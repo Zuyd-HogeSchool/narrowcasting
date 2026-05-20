@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Narrowcasting")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5008c14d64c9dbc9f62fd66b4ba5c85dc7416567")]
 [assembly: System.Reflection.AssemblyProductAttribute("Narrowcasting")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Narrowcasting")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
