@@ -14,5 +14,7 @@ namespace Narrowcasting.Models
 
         //Navigation
         public ICollection<Screen> Screens { get; set; } = new List<Screen>();
+        public ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+        public ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
     }
 }
