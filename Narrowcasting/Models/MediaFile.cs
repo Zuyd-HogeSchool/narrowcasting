@@ -27,6 +27,7 @@ namespace Narrowcasting.Models
         public string? UploadedById { get; set; }
 
         //Navigation properties
+        public ApplicationUser? UploadedBy { get; set; }
         public ICollection<PlaylistItem> PlaylistItems { get; set; } = new List<PlaylistItem>();
     }
 }

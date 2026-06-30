@@ -24,6 +24,7 @@ namespace Narrowcasting.Models
         //Make navigation nullable so model validation does not require the full related entity
         public Department? Department { get; set; }
         public ICollection<Playlist> Playlists { get; set; } = new List<Playlist>();
+        public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 
     }
 }

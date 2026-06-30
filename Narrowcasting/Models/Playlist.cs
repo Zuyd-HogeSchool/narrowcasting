@@ -18,6 +18,8 @@ namespace Narrowcasting.Models
 
         //Navigation
         public Screen? Screen { get; set; }
-        public ICollection<PlaylistItem> PlaylistItems { get; set; } = new List<PlaylistItem>();
+        public ApplicationUser? CreatedBy { get; set; }
+        public ICollection<PlaylistItem> Items { get; set; } = new List<PlaylistItem>();
+        public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
     }
 }
