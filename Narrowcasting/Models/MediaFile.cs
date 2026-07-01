@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Formatters;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Narrowcasting.Enums;
 
 namespace Narrowcasting.Models
 {

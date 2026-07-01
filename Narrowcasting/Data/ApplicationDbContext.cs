@@ -6,9 +6,15 @@ namespace Narrowcasting.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public DbSet<Department> Departments => Set<Department>();
+        public DbSet<Screen> Screens => Set<Screen>();
+        public DbSet<Playlist> Playlists => Set<Playlist>();
+        public DbSet<PlaylistItem> PlaylistItems => Set<PlaylistItem>();
+        public DbSet<MediaFile> MediaFiles => Set<MediaFile>();
         public DbSet<Schedule> Schedules => Set<Schedule>();
         public DbSet<Announcement> Announcements => Set<Announcement>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -26,6 +32,79 @@ namespace Narrowcasting.Data
                  .WithMany(d => d.Users)
                  .HasForeignKey(u => u.DepartmentId)
                  .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Department
+            builder.Entity<Department>(e =>
+            {
+                e.HasKey(d => d.Id);
+                e.Property(d => d.Name).IsRequired().HasMaxLength(100);
+                e.Property(d => d.Description).HasMaxLength(500);
+            });
+
+            // Screen
+            builder.Entity<Screen>(e =>
+            {
+                e.HasKey(s => s.Id);
+                e.Property(s => s.Name).IsRequired().HasMaxLength(100);
+                e.Property(s => s.Location).IsRequired().HasMaxLength(200);
+
+                e.HasOne(s => s.Department)
+                 .WithMany(d => d.Screens)
+                 .HasForeignKey(s => s.DepartmentId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Playlist
+            builder.Entity<Playlist>(e =>
+            {
+                e.HasKey(p => p.Id);
+                e.Property(p => p.Name).IsRequired().HasMaxLength(100);
+                e.Property(p => p.CreatedAt).IsRequired();
+
+                e.HasOne(p => p.Screen)
+                 .WithMany(s => s.Playlists)
+                 .HasForeignKey(p => p.ScreenId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(p => p.CreatedBy)
+                 .WithMany(u => u.CreatedPlaylists)
+                 .HasForeignKey(p => p.CreatedById)
+                 .OnDelete(DeleteBehavior.Restrict)
+                 .IsRequired(false);
+            });
+
+            // PlaylistItem
+            builder.Entity<PlaylistItem>(e =>
+            {
+                e.HasKey(pi => pi.Id);
+                e.Property(pi => pi.Order).IsRequired();
+                e.Property(pi => pi.DurationSeconds).IsRequired();
+
+                e.HasOne(pi => pi.Playlist)
+                 .WithMany(p => p.Items)
+                 .HasForeignKey(pi => pi.PlaylistId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(pi => pi.MediaFile)
+                 .WithMany(m => m.PlaylistItems)
+                 .HasForeignKey(pi => pi.MediaFileId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // MediaFile
+            builder.Entity<MediaFile>(e =>
+            {
+                e.HasKey(mf => mf.Id);
+                e.Property(mf => mf.FileName).IsRequired().HasMaxLength(100);
+                e.Property(mf => mf.FilePath).IsRequired().HasMaxLength(200);
+                e.Property(mf => mf.UploadedAt).IsRequired();
+
+                e.HasOne(mf => mf.UploadedBy)
+                 .WithMany(u => u.UploadedFiles)
+                 .HasForeignKey(mf => mf.UploadedById)
+                 .OnDelete(DeleteBehavior.Restrict)
+                 .IsRequired(false);
             });
 
             // Schedule
