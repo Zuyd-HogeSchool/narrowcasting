@@ -1,4 +1,4 @@
-﻿namespace NarrowCasting.Enums
+﻿namespace Narrowcasting.Enums
 {
     public enum MediaType
     {
