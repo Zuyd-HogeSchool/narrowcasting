@@ -1,4 +1,4 @@
-﻿using NarrowCasting.Enums;
+﻿using Narrowcasting.Enums;
 
 namespace Narrowcasting.Models
 {
