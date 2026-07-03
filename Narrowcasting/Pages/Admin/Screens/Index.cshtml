@@ -1,0 +1,157 @@
+﻿@page
+@model Narrowcasting.Pages.Admin.Screens.IndexModel
+@{
+    ViewData["Title"] = "Schermen";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">Schermen</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                <li class="breadcrumb-item active">Schermen</li>
+            </ol>
+        </nav>
+    </div>
+    <a asp-page="/Admin/Screens/Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Nieuw scherm
+    </a>
+</div>
+
+@if (TempData["Success"] is string msg)
+{
+    <div class="alert alert-success alert-dismissible fade show py-2 small">
+        <i class="bi bi-check-circle me-2"></i>@msg
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm mt-3">
+    <div class="card-body p-0">
+        <div class="px-3 pt-3 pb-2 d-flex gap-2">
+            <input type="text" id="searchInput" class="form-control form-control-sm w-auto"
+                   placeholder="Zoeken..." oninput="filterTable()" />
+            <select id="deptFilter" class="form-select form-select-sm w-auto" onchange="filterTable()">
+                <option value="">Alle afdelingen</option>
+                @foreach (var dept in Model.Departments)
+                {
+                    <option value="@dept.Name">@dept.Name</option>
+                }
+            </select>
+        </div>
+        <table class="table nc-table mb-0" id="screenTable">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Naam</th>
+                    <th>Locatie</th>
+                    <th>Afdeling</th>
+                    <th>Status</th>
+                    <th>Intern</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var screen in Model.Screens)
+                {
+                    <tr>
+                        <td class="text-muted small">@screen.Id</td>
+                        <td class="fw-medium">@screen.Name</td>
+                        <td class="text-muted small">@screen.Location</td>
+                        <td class="small">@screen.Department?.Name</td>
+                        <td>
+                            @if (screen.IsActive)
+                            {
+                                <span class="badge badge-active rounded-pill">Actief</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge badge-inactive rounded-pill">Inactief</span>
+                            }
+                        </td>
+                        <td>
+                            @if (screen.IsStaffScreen)
+                            {
+                                <span class="badge bg-secondary rounded-pill">Intern</span>
+                            }
+                            else
+                            {
+
+                                <span class="text-muted small">–</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-page="/Admin/Screens/Edit" asp-route-id="@screen.Id"
+                               class="btn btn-sm btn-outline-secondary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a asp-page="/Public/Display" asp-route-screenId="@screen.Id"
+                               target="_blank" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-play"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                    data-id="@screen.Id" data-name="@screen.Name">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Screens.Any())
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">Geen schermen gevonden.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h6 class="modal-title">Scherm verwijderen?</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body small text-muted">
+                Weet je zeker dat je <strong id="deleteName"></strong> wilt verwijderen?
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                <form method="post" asp-page-handler="Delete" id="deleteForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteId" />
+                    <button type="submit" class="btn btn-sm btn-danger">Verwijderen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModalEl = document.getElementById('deleteModal');
+        if (deleteModalEl) {
+            deleteModalEl.addEventListener('show.bs.modal', function (e) {
+                const btn = e.relatedTarget;
+                if (!btn) return;
+                document.getElementById('deleteId').value   = btn.dataset.id ?? '';
+                document.getElementById('deleteName').textContent = btn.dataset.name ?? '';
+            });
+        }
+
+        // Client-side search + filter
+        function filterTable() {
+            const search = (document.getElementById('searchInput')?.value ?? '').toLowerCase();
+            const dept   = (document.getElementById('deptFilter')?.value ?? '').toLowerCase();
+            document.querySelectorAll('#screenTable tbody tr').forEach(row => {
+                const text = (row.textContent ?? '').toLowerCase();
+                const deptCell = (row.cells[3]?.textContent ?? '').toLowerCase();
+                row.style.display = text.includes(search) && (dept === '' || deptCell.includes(dept)) ? '' : 'none';
+            });
+        }
+    </script>
+}
