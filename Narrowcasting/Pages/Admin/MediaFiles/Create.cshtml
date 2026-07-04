@@ -1,0 +1,85 @@
+@page
+@model Narrowcasting.Pages.Admin.MediaFiles.CreateModel
+@using Narrowcasting.Enums
+@{
+    ViewData["Title"] = "Upload media";
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="SelectedMediaType" class="form-label small">Mediatype *</label>
+                <select asp-for="SelectedMediaType" class="form-select" id="mediaTypeSelect">
+                    <option value="@MediaType.Text">Text</option>
+                    <option value="@MediaType.Image">Image</option>
+                    <option value="@MediaType.Video">Video</option>
+                    <option value="@MediaType.Audio">Audio</option>
+                </select>
+                <span asp-validation-for="SelectedMediaType" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3" id="fileUploadSection">
+                <label asp-for="Upload" class="form-label small">Bestand *</label>
+                <input asp-for="Upload" type="file" class="form-control" />
+                <span asp-validation-for="Upload" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3" id="textContentSection" style="display:none;">
+                <label asp-for="TextContent" class="form-label small">Tekst *</label>
+                <textarea asp-for="TextContent" class="form-control" rows="5" maxlength="10000"></textarea>
+                <span asp-validation-for="TextContent" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Caption" class="form-label small">Bijschrift</label>
+                <input asp-for="Caption" class="form-control" maxlength="500" />
+                <span asp-validation-for="Caption" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="submit">Uploaden</button>
+                <a asp-page="/Admin/MediaFiles/Index" class="btn btn-outline-secondary">Terug</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const MEDIA_TEXT = '0';
+        const accepts = {
+            0: '',   // Text
+            1: '.jpg,.jpeg,.png,.gif,.webp,image/*',   // Image
+            2: '.mp4,.webm,.mov,.m4v,video/*',         // Video
+            3: '.mp3,.wav,.ogg,.m4a,audio/*'           // Audio
+        };
+
+        const mediaTypeSelect = document.getElementById('mediaTypeSelect');
+        const uploadInput = document.getElementById('Upload');
+        const fileUploadSection = document.getElementById('fileUploadSection');
+        const textContentSection = document.getElementById('textContentSection');
+
+        function syncUploadAccept() {
+            const selected = mediaTypeSelect.value;  // e.g. "0", "1", "2", "3"
+
+            if (selected === MEDIA_TEXT) {
+                fileUploadSection.style.display = 'none';
+                textContentSection.style.display = 'block';
+                uploadInput.value = '';   // clear any file selection
+                uploadInput.removeAttribute('accept');
+            } else {
+                fileUploadSection.style.display = 'block';
+                textContentSection.style.display = 'none';
+                uploadInput.accept = accepts[selected] || accepts[1]; // fallback to Image
+            }
+        }
+
+        mediaTypeSelect.addEventListener('change', syncUploadAccept);
+        syncUploadAccept();
+    </script>
+}

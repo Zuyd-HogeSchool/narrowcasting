@@ -1,0 +1,109 @@
+﻿@page
+@model Narrowcasting.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "Gebruikers";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                <li class="breadcrumb-item active">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+    <a asp-page="/Admin/Users/Create" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i>Nieuwe gebruiker
+    </a>
+</div>
+
+@if (TempData["Success"] is string msg)
+{
+    <div class="alert alert-success alert-dismissible fade show py-2 small">
+        <i class="bi bi-check-circle me-2"></i>@msg
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small">
+        <i class="bi bi-exclamation-triangle me-2"></i>@errMsg
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm mt-3">
+    <div class="card-body p-0">
+        <table class="table nc-table mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Naam</th>
+                    <th>E-mail</th>
+                    <th>Rol</th>
+                    <th>Afdeling</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.Users)
+                {
+                    <tr>
+                        <td class="fw-medium">@u.FullName</td>
+                        <td class="small text-muted">@u.Email</td>
+                        <td>
+                            @if (u.Role == "Admin")
+                            {
+                                <span class="badge bg-primary rounded-pill">Admin</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge bg-info text-dark rounded-pill">Employee</span>
+                            }
+                        </td>
+                        <td class="small">@(u.DepartmentName ?? (u.Role == "Admin" ? "Alle afdelingen" : "Nog niet toegewezen"))</td>
+                        <td>
+                            @if (u.IsPendingApproval)
+                            {
+                                <span class="badge bg-warning text-dark rounded-pill">Wacht op goedkeuring</span>
+                            }
+                            else if (u.IsActive)
+                            {
+                                <span class="badge badge-active rounded-pill">Actief</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge badge-inactive rounded-pill">Gedeactiveerd</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-page="/Admin/Users/Edit" asp-route-id="@u.Id"
+                               class="btn btn-sm btn-outline-secondary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            @if (u.Id != Model.CurrentUserId)
+                            {
+                                <form method="post" asp-page-handler="ToggleActive" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button type="submit" class="btn btn-sm @(u.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                            title="@(u.IsActive ? "Deactiveren" : "Activeren")">
+                                        <i class="bi @(u.IsActive ? "bi-slash-circle" : "bi-check-circle")"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Users.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">Geen gebruikers gevonden.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

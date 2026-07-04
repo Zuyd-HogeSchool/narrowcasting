@@ -6,6 +6,7 @@ using Narrowcasting.Data;
 using Narrowcasting.Interfaces;
 using Narrowcasting.Models;
 using Narrowcasting.Services;
+using Serilog;
 using System.Text.Json.Serialization;
 
 namespace Narrowcasting
@@ -15,29 +16,38 @@ namespace Narrowcasting
         public static async Task Main(string[] args)
         {
             // Configure Serilog early so startup errors are captured
-            //Log.Logger = new LoggerConfiguration()
-            //    .MinimumLevel.Debug()
-            //    .WriteTo.Console()
-            //    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14)
-            //    .CreateLogger();
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14)
+                .CreateLogger();
             // Capture unhandled exceptions from AppDomain and TaskScheduler
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                //try { Log.Fatal((Exception?)e.ExceptionObject, "Unhandled domain exception"); }
-                //catch { }
+                try { Log.Fatal((Exception?)e.ExceptionObject, "Unhandled domain exception"); }
+                catch { }
             };
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
                 try
                 {
-                    //Log.Fatal(e.Exception, "Unobserved task exception");
-                    //e.SetObserved();
+                    Log.Fatal(e.Exception, "Unobserved task exception");
+                    e.SetObserved();
                 }
                 catch { }
             };
 
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Host.UseSerilog((context, services, configuration) =>
+            {
+                configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console();
+            });
 
             // Database
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -193,8 +203,8 @@ namespace Narrowcasting
                         var createResult = await userManager.CreateAsync(adminUser, adminPassword);
                         if (!createResult.Succeeded)
                         {
-                            //Log.Warning("Could not create default admin account: {Errors}",
-                            //    string.Join("; ", createResult.Errors.Select(e => e.Description)));
+                            Log.Warning("Could not create default admin account: {Errors}",
+                                string.Join("; ", createResult.Errors.Select(e => e.Description)));
                         }
                     }
 
@@ -204,8 +214,8 @@ namespace Narrowcasting
                         var addRoleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
                         if (!addRoleResult.Succeeded)
                         {
-                            //Log.Warning("Could not add admin role to account: {Errors}",
-                            //    string.Join("; ", addRoleResult.Errors.Select(e => e.Description)));
+                            Log.Warning("Could not add admin role to account: {Errors}",
+                                string.Join("; ", addRoleResult.Errors.Select(e => e.Description)));
                         }
                     }
                 }
@@ -237,7 +247,7 @@ namespace Narrowcasting
             });
 
             app.UseRouting();
-            //app.UseSerilogRequestLogging();
+            app.UseSerilogRequestLogging();
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -253,7 +263,7 @@ namespace Narrowcasting
             }
             finally
             {
-                //await Log.CloseAndFlushAsync();
+                await Log.CloseAndFlushAsync();
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Narrowcasting.Models;
 
@@ -169,7 +170,57 @@ namespace Narrowcasting.Data
                  .HasForeignKey(al => al.UserId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
+
+            SeedData(builder);
         }
 
+        private static void SeedData(ModelBuilder builder)
+        {
+            // Departments
+            builder.Entity<Department>().HasData(
+                new Department { Id = 1, Name = "Wachtkamer", Description = "Algemene wachtkamer begane grond" },
+                new Department { Id = 2, Name = "Radiologie", Description = "Radiologie & beeldvorming" },
+                new Department { Id = 3, Name = "Apotheek", Description = "Ziekenhuisapotheek" }
+            );
+
+            // Screens
+            builder.Entity<Screen>().HasData(
+                new Screen { Id = 1, Name = "Scherm Wachtkamer A", Location = "Wachtkamer Begane Grond", IsActive = true, DepartmentId = 1 },
+                new Screen { Id = 2, Name = "Scherm Radiologie", Location = "Radiologie Gang", IsActive = true, DepartmentId = 2 },
+                new Screen { Id = 3, Name = "Scherm Apotheek", Location = "Apotheek Balie", IsActive = true, DepartmentId = 3 }
+            );
+
+            // Admin role + Employee role
+            var adminRoleId = "ROLE-ADMIN-0001";
+            var employeeRoleId = "ROLE-EMP-0001";
+
+            builder.Entity<IdentityRole>().HasData(
+                new IdentityRole { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole { Id = employeeRoleId, Name = "Employee", NormalizedName = "EMPLOYEE" }
+            );
+
+            // Admin user
+            //var adminId = "USER-ADMIN-0001";
+            //var hasher = new PasswordHasher<ApplicationUser>();
+            //var adminUser = new ApplicationUser
+            //{
+            //    Id = adminId,
+            //    UserName = "admin@ziekenhuis.nl",
+            //    NormalizedUserName = "ADMIN@ZIEKENHUIS.NL",
+            //    Email = "admin@ziekenhuis.nl",
+            //    NormalizedEmail = "ADMIN@ZIEKENHUIS.NL",
+            //    EmailConfirmed = true,
+            //    FullName = "Systeem Administrator",
+            //    DepartmentId = null,   // Admin = cross-department
+            //    IsActive = true,
+            //    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            //};
+            //adminUser.PasswordHash = hasher.HashPassword(adminUser, "Admin@123!");
+            //builder.Entity<ApplicationUser>().HasData(adminUser);
+
+            //builder.Entity<IdentityUserRole<string>>().HasData(
+            //    new IdentityUserRole<string> { UserId = adminId, RoleId = adminRoleId }
+            //);
+        }
     }
 }
