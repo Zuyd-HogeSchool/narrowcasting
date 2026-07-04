@@ -1,0 +1,227 @@
+﻿@page "/Display/{screenId:int}"
+@model Narrowcasting.Pages.Public.DisplayModel
+@{
+    ViewData["Title"] = "Narrowcast";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(Model.Screen?.Name ?? "Narrowcast")</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; background: #0a0f1e; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+
+        /* Fullscreen carousel */
+        .nc-display { height: 100vh; display: flex; flex-direction: column; }
+        .nc-topbar {
+            background: rgba(0,0,0,.6); backdrop-filter: blur(8px);
+            padding: .75rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0;
+        }
+        .nc-topbar .screen-name { font-size: 1rem; font-weight: 700; opacity: .85; }
+        .nc-topbar .clock       { font-size: 1.1rem; font-weight: 300; font-variant-numeric: tabular-nums; }
+        .nc-topbar .dept-badge  { background: rgba(255,255,255,.15); border-radius: 20px;
+                                   padding: .2rem .8rem; font-size: .8rem; }
+
+        .nc-content { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .slide-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .slide-video { background: #000; }
+        .slide-audio { width: min(760px, 80vw); position: relative; z-index: 2; }
+        .slide-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.65)); }
+
+        .ann-card {
+            position: relative; z-index: 2;
+            background: rgba(0,0,0,.42); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 16px; padding: 3rem 4rem; max-width: 900px; text-align: center;
+            animation: fadeInUp .6s ease;
+        }
+        .ann-card .ann-dept   { font-size: .85rem; opacity: .6; margin-bottom: .5rem; letter-spacing: .05em; text-transform: uppercase; }
+        .ann-card .ann-title  { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.2; }
+        .ann-card .ann-body   { font-size: 1.1rem; opacity: .8; line-height: 1.6; }
+        
+
+        /* Ticker / bottom bar */
+        .nc-ticker {
+            background: rgba(13,110,253,.85); padding: .5rem 1.5rem;
+            display: flex; align-items: center; gap: 1rem; flex-shrink: 0; overflow: hidden;
+        }
+        .nc-ticker .ticker-label { font-weight: 700; white-space: nowrap; font-size: .85rem; }
+        .nc-ticker .ticker-text  { white-space: nowrap; animation: ticker 30s linear infinite; font-size: .9rem; }
+
+        /* Progress bar */
+        .nc-progress { height: 3px; background: rgba(255,255,255,.15); flex-shrink: 0; }
+        .nc-progress-bar { height: 3px; background: #0d6efd; transition: none; }
+    </style>
+</head>
+<body>
+@if (Model.Screen is null)
+{
+    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+        <div class="text-center">
+            <i class="bi bi-exclamation-triangle" style="font-size:3rem"></i>
+            <p class="mt-3">Scherm niet gevonden.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="nc-display">
+        <!-- Top bar -->
+        <div class="nc-topbar">
+            <div class="d-flex align-items-center gap-3">
+                <span class="screen-name"><i class="bi bi-display me-2"></i>@Model.Screen.Name</span>
+                <span class="dept-badge">@Model.Screen.Department?.Name</span>
+            </div>
+            <div class="clock" id="clock"></div>
+        </div>
+
+        <!-- Progress -->
+        <div class="nc-progress">
+            <div class="nc-progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Main content area -->
+        <div class="nc-content">
+            @if (Model.Slides.Any())
+            {
+                <img class="slide-media d-none" id="slideImage" alt="" />
+                <video class="slide-media slide-video d-none" id="slideVideo" muted autoplay playsinline></video>
+                <div class="slide-overlay d-none" id="slideOverlay"></div>
+                <audio class="slide-audio d-none" id="slideAudio" controls autoplay></audio>
+                <div class="ann-card" id="slideText" style="display:none">
+                    <div class="ann-dept" id="slideDept"></div>
+                    <div class="ann-title" id="slideTitle">Laden...</div>
+                    <div class="ann-body" id="slideBody"></div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center opacity-50">
+                    <i class="bi bi-display" style="font-size:4rem"></i>
+                    <p class="mt-3 fs-5">Geen content beschikbaar</p>
+                </div>
+            }
+        </div>
+
+        <!-- Ticker -->
+        @if (Model.Slides.Any())
+        {
+            <div class="nc-ticker">
+                <span class="ticker-label">INFO</span>
+                <span class="ticker-text">
+                    @string.Join("  •  ", Model.Slides.Select(a => a.Title))
+                </span>
+            </div>
+        }
+    </div>
+
+    @if (Model.Slides.Any())
+    {
+        <script>
+            const announcements = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Model.Slides.Select(s => new
+                {
+                    title = s.Title,
+                    body = s.Body,
+                    department = s.Department,
+                    filePath = s.FilePath,
+                    mediaType = s.MediaType,
+                    durationMs = s.DurationMs
+                })));
+
+            let current = 0;
+            const DEFAULT_DURATION = 4000;
+            let slideTimer = null;
+
+            function showAnnouncement(index) {
+                const a = announcements[index];
+                const card = document.getElementById('slideText');
+                const image = document.getElementById('slideImage');
+                const video = document.getElementById('slideVideo');
+                const audio = document.getElementById('slideAudio');
+                const overlay = document.getElementById('slideOverlay');
+
+                image.classList.add('d-none');
+                video.classList.add('d-none');
+                audio.classList.add('d-none');
+                overlay.classList.add('d-none');
+                video.pause();
+                audio.pause();
+                video.removeAttribute('src');
+                audio.removeAttribute('src');
+
+                if (a.filePath && a.mediaType === 'Image') {
+                    image.src = a.filePath;
+                    image.classList.remove('d-none');
+                    overlay.classList.remove('d-none');
+                } else if (a.filePath && a.mediaType === 'Video') {
+                    video.src = a.filePath;
+                    video.classList.remove('d-none');
+                    video.play();
+                } else if (a.filePath && a.mediaType === 'Audio') {
+                    audio.src = a.filePath;
+                    audio.classList.remove('d-none');
+                    audio.play();
+                }
+
+                const dept = a.department ?? '';
+                const title = a.title ?? '';
+                const body = a.body ?? '';
+                const hasText = dept || title || body;
+
+                if (hasText) {
+                    card.style.display = '';
+                    card.style.animation = 'none';
+                    void card.offsetWidth;
+                    card.style.animation = 'fadeInUp .6s ease';
+
+                    document.getElementById('slideDept').textContent  = dept;
+                    document.getElementById('slideTitle').textContent = title;
+                    document.getElementById('slideBody').textContent  = body;
+                } else {
+                    card.style.display = 'none';
+                }
+
+                const duration = a.durationMs || DEFAULT_DURATION;
+                const bar = document.getElementById('progressBar');
+                bar.style.transition = 'none';
+                bar.style.width = '0%';
+                void bar.offsetWidth;
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+
+                window.clearTimeout(slideTimer);
+                slideTimer = window.setTimeout(next, duration);
+            }
+
+            function next() {
+                current = (current + 1) % announcements.length;
+                showAnnouncement(current);
+            }
+
+            showAnnouncement(0);
+
+            // Clock
+            function updateClock() {
+                const now = new Date();
+                document.getElementById('clock').textContent =
+                    now.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // Auto-refresh every 30 seconds (NFR-6)
+            setTimeout(() => location.reload(), 30000);
+        </script>
+    }
+}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

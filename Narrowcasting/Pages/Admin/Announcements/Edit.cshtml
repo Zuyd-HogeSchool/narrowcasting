@@ -1,0 +1,91 @@
+﻿@page "{id?}"
+@model Narrowcasting.Pages.Admin.Announcements.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Nieuwe aankondiging" : "Aankondiging bewerken";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Admin/Announcements/Index">Aankondigingen</a></li>
+                <li class="breadcrumb-item active">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Item.Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Item.Title" class="form-label fw-medium small">Titel *</label>
+                        <input asp-for="Item.Title" class="form-control" />
+                        <span asp-validation-for="Item.Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.Content" class="form-label fw-medium small">Inhoud *</label>
+                        <textarea asp-for="Item.Content" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Item.Content" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Item.DepartmentId" class="form-label fw-medium small">Afdeling *</label>
+                            <select asp-for="Item.DepartmentId" class="form-select"
+                                    asp-items="@Model.DepartmentSelectList">
+                                <option value="">– Selecteer –</option>
+                            </select>
+                            <span asp-validation-for="Item.DepartmentId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Item.ExpiresAt" class="form-label fw-medium small">Vervaldatum</label>
+                            <input asp-for="Item.ExpiresAt" type="datetime-local" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Item.ScreenId" class="form-label fw-medium small">Scherm</label>
+                            <select asp-for="Item.ScreenId" class="form-select"
+                                    asp-items="@Model.ScreenSelectList">
+                                <option value="">Alle schermen van de afdeling</option>
+                            </select>
+                            <span asp-validation-for="Item.ScreenId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Item.MediaFileId" class="form-label fw-medium small">Media</label>
+                            <select asp-for="Item.MediaFileId" class="form-select"
+                                    asp-items="@Model.MediaFileSelectList">
+                                <option value="">Geen media</option>
+                            </select>
+                            <span asp-validation-for="Item.MediaFileId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch">
+                        <input asp-for="Item.IsInternal" class="form-check-input" role="switch" />
+                        <label asp-for="Item.IsInternal" class="form-check-label small">
+                            Intern bericht (alleen zichtbaar op personeelsschermen)
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-floppy me-1"></i>Opslaan
+                        </button>
+                        <a asp-page="/Admin/Announcements/Index" class="btn btn-outline-secondary">Annuleren</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,174 @@
+﻿@page
+@model Narrowcasting.Pages.Admin.MediaFiles.IndexModel
+@using Narrowcasting.Enums
+@{
+    ViewData["Title"] = "Mediabestanden";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">Mediabestanden</h1>
+    </div>
+    <a asp-page="/Admin/MediaFiles/Create" class="btn btn-primary">Uploaden</a>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success alert-dismissible fade show py-2 small">
+        <i class="bi bi-check-circle me-2"></i>@success
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small">
+        <i class="bi bi-exclamation-triangle me-2"></i>@error
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-3">
+    @foreach (var mf in Model.MediaFiles)
+    {
+        <div class="col-3">
+            <div class="card">
+                @if (mf.MediaType == MediaType.Image)
+                {
+                    <img src="@mf.FilePath" class="card-img-top" alt="@mf.Caption" />
+                }
+                else if (mf.MediaType == MediaType.Video)
+                {
+                    <video src="@mf.FilePath" class="card-img-top" controls preload="metadata"></video>
+                }
+                else if (mf.MediaType == MediaType.Audio)
+                {
+                    <div class="p-3 bg-light border-bottom">
+                        <audio src="@mf.FilePath" controls class="w-100"></audio>
+                    </div>
+                }
+                else if (mf.MediaType == MediaType.Text)
+                {
+                    <div class="p-3 bg-light border-bottom">
+                        <div class="small">
+                            @(string.IsNullOrWhiteSpace(mf.TextContent)
+                                                ? "Geen tekst beschikbaar"
+                                                : (mf.TextContent.Length > 200
+                                                ? mf.TextContent.Substring(0, 200) + "..."
+                                                : mf.TextContent))
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height:160px;background:#f1f3f6;">
+                        <i class="bi bi-file-earmark-text" style="font-size:2rem;color:#6c757d"></i>
+                    </div>
+                }
+
+                <div class="card-body p-2 small">
+                    <div class="fw-medium">@mf.FileName</div>
+                    <div><span class="badge bg-secondary">@mf.MediaType</span></div>
+                    <div class="text-muted">@mf.UploadedAt.ToLocalTime()</div>
+                    @if (!string.IsNullOrEmpty(mf.Caption))
+                    {
+                        <div class="mt-1">@mf.Caption</div>
+                    }
+                    <div class="mt-2 d-flex gap-2">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editMediaModal"
+                                data-id="@mf.Id"
+                                data-caption="@mf.Caption"
+                                data-textcontent="@mf.TextContent"
+                                data-mediatype="@((int)mf.MediaType)"
+                                data-filepath="@mf.FilePath">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <form method="post" asp-page-handler="Delete">
+                            <input type="hidden" name="id" value="@mf.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Weet je zeker dat je dit mediabestand wilt verwijderen?');">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="editMediaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Edit" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="EditId" id="editId" />
+                <div class="modal-header border-0">
+                    <h6 class="modal-title fw-bold">Media bewerken</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium small">Bijschrift</label>
+                        <input name="EditCaption" id="editCaption" class="form-control" maxlength="500" />
+                    </div>
+                    <div class="mb-3" id="editTextContentSection" style="display:none;">
+                        <label class="form-label fw-medium small">Tekst</label>
+                        <textarea name="EditTextContent" id="editTextContent" class="form-control" rows="5" maxlength="10000"></textarea>
+                    </div>
+                    <div class="mb-3" id="editFileSection">
+                        <label class="form-label fw-medium small">Vervang bestand</label>
+                        <input type="file" name="EditFile" class="form-control" />
+                        <small class="text-muted">Laat leeg om het huidige bestand te behouden.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                    <button type="submit" class="btn btn-sm btn-primary">Opslaan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const editMediaModal = document.getElementById('editMediaModal');
+        editMediaModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const caption = button.getAttribute('data-caption') || '';
+            const textContent = button.getAttribute('data-textcontent') || '';
+            const mediaType = parseInt(button.getAttribute('data-mediatype'));
+            // mediaType: 0=Text, 1=Image, 2=Video, 3=Audio
+
+            document.getElementById('editId').value = id;
+            document.getElementById('editCaption').value = caption;
+
+            const textSection = document.getElementById('editTextContentSection');
+            const fileSection = document.getElementById('editFileSection');
+
+            if (mediaType === 0) { // Text
+                textSection.style.display = 'block';
+                document.getElementById('editTextContent').value = textContent;
+                fileSection.style.display = 'none'; // no file for text
+            } else {
+                textSection.style.display = 'none';
+                fileSection.style.display = 'block';
+            }
+        });
+
+        // Clear modal when hidden (optional)
+        editMediaModal.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('editId').value = '';
+            document.getElementById('editCaption').value = '';
+            document.getElementById('editTextContent').value = '';
+            document.querySelector('input[name="EditFile"]').value = '';
+        });
+    </script>
+}   
