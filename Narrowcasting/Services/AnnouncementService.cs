@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Narrowcasting.Data;
 using Narrowcasting.Interfaces;
 using Narrowcasting.Models;
