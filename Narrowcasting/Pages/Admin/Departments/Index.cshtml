@@ -1,0 +1,149 @@
+﻿@page
+@model Narrowcasting.Pages.Admin.Departments.IndexModel
+@{
+    ViewData["Title"] = "Afdelingen";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">Afdelingen</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                <li class="breadcrumb-item active">Afdelingen</li>
+            </ol>
+        </nav>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal" onclick="openModal(null)">
+            <i class="bi bi-plus-lg me-1"></i>Nieuwe afdeling
+        </button>
+    }
+</div>
+
+@if (TempData["Success"] is string msg)
+{
+    <div class="alert alert-success alert-dismissible fade show py-2 small">
+        <i class="bi bi-check-circle me-2"></i>@msg
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small">
+        <i class="bi bi-exclamation-triangle me-2"></i>@errorMsg
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-3 mt-1">
+    @foreach (var dept in Model.Departments)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="fw-bold mb-1">@dept.Name</h6>
+                            <p class="text-muted small mb-2">@dept.Description</p>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-display me-1"></i>@dept.Screens.Count schermen
+                            </span>
+                        </div>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <button type="button"
+                                                class="dropdown-item small dept-open-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deptModal"
+                                                data-id="@dept.Id"
+                                                data-name="@dept.Name"
+                                                data-desc="@dept.Description">
+                                            <i class="bi bi-pencil me-2"></i>Bewerken
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <form method="post" asp-page-handler="Delete">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@dept.Id" />
+                                            <button type="submit" class="dropdown-item text-danger small"
+                                                    onclick="return confirm('Afdeling verwijderen?')">
+                                                <i class="bi bi-trash me-2"></i>Verwijderen
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (!Model.Departments.Any())
+    {
+        <div class="col-12 text-center text-muted py-5">Geen afdelingen gevonden.</div>
+    }
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade" id="deptModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Save">
+                @Html.AntiForgeryToken()
+                <div class="modal-header border-0">
+                    <h6 class="modal-title fw-bold" id="deptModalTitle">Afdeling</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="dept.Id" id="deptId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-medium small">Naam *</label>
+                        <input type="text" name="dept.Name" id="deptName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium small">Omschrijving</label>
+                        <textarea name="dept.Description" id="deptDesc" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-floppy me-1"></i>Opslaan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Delegated handler for both new/edit buttons
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.dept-open-btn');
+            if (!btn) return;
+            const id = btn.getAttribute('data-id') ?? '0';
+            const name = btn.getAttribute('data-name') ?? '';
+            const desc = btn.getAttribute('data-desc') ?? '';
+            openModal(id, name, desc);
+        });
+
+        function openModal(id, name = '', desc = '') {
+            document.getElementById('deptId').value = id ?? 0;
+            document.getElementById('deptName').value = name;
+            document.getElementById('deptDesc').value = desc;
+            document.getElementById('deptModalTitle').textContent =
+                (id && id !== '0') ? 'Afdeling bewerken' : 'Nieuwe afdeling';
+        }
+    </script>
+}

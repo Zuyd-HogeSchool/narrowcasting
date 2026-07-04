@@ -4,7 +4,7 @@ using Narrowcasting.Interfaces;
 using Narrowcasting.Models;
 using Narrowcasting.Enums;
 
-namespace NarrowCasting.Services
+namespace Narrowcasting.Services
 {
     public class MediaFileService : IMediaFileService
     {
