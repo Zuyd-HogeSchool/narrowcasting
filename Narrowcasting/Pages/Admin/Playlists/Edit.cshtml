@@ -1,0 +1,135 @@
+﻿@page "{id?}"
+@model Narrowcasting.Pages.Admin.Playlists.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Nieuwe playlist" : "Playlist beheren";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Admin/Playlists/Index">Playlists</a></li>
+                <li class="breadcrumb-item active">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small">
+        <i class="bi bi-exclamation-triangle me-2"></i>@errMsg
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-3">
+    <!-- Playlist details -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 fw-semibold">
+                <i class="bi bi-info-circle me-2 text-primary"></i>Details
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="SaveDetails">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Playlist.Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Playlist.Name" class="form-label fw-medium small">Naam *</label>
+                        <input asp-for="Playlist.Name" class="form-control" placeholder="bijv. Ochtend playlist" />
+                        <span asp-validation-for="Playlist.Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Playlist.ScreenId" class="form-label fw-medium small">Scherm *</label>
+                        <select asp-for="Playlist.ScreenId" class="form-select" asp-items="@Model.ScreenSelectList">
+                            <option value="0">– Selecteer scherm –</option>
+                        </select>
+                        <span asp-validation-for="Playlist.ScreenId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-floppy me-1"></i>Opslaan
+                        </button>
+                        <a asp-page="/Admin/Playlists/Index" class="btn btn-outline-secondary">Terug</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist items -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-music-note-list me-2 text-primary"></i>Items (@Model.Playlist.Items.Count / 20)</span>
+            </div>
+            <div class="card-body">
+                @if (Model.IsNew)
+                {
+                    <p class="text-muted small mb-0">Sla eerst de playlist op voordat je items toevoegt.</p>
+                }
+                else
+                {
+                    <!-- Add item form -->
+                    <form method="post" asp-page-handler="AddItem" class="row g-2 mb-3 pb-3 border-bottom">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="playlistId" value="@Model.Playlist.Id" />
+                        <div class="col-12">
+                            <select name="mediaFileId" class="form-select form-select-sm" required
+                                    asp-items="@Model.MediaFileSelectList">
+                                <option value="">– Selecteer mediabestand –</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <input type="number" name="durationSeconds" class="form-control form-control-sm"
+                                   placeholder="Duur (sec)" value="10" min="1" max="3600" required />
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                <i class="bi bi-plus-lg me-1"></i>Toevoegen
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Items list -->
+                    @if (Model.Playlist.Items.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.Playlist.Items.OrderBy(i => i.Order))
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <span class="badge bg-light text-dark border me-2">#@item.Order</span>
+                                        <span class="fw-medium">@item.MediaFile?.FileName</span>
+                                        <span class="text-muted small ms-2">
+                                            <i class="bi bi-clock me-1"></i>@item.DurationSeconds s
+                                        </span>
+                                        <span class="badge bg-secondary ms-2">@item.MediaFile?.MediaType</span>
+                                    </div>
+                                    <form method="post" asp-page-handler="RemoveItem">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="itemId" value="@item.Id" />
+                                        <input type="hidden" name="playlistId" value="@Model.Playlist.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Item verwijderen?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted small text-center py-3 mb-0">Nog geen items toegevoegd.</p>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

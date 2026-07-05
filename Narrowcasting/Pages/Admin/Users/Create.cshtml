@@ -1,0 +1,81 @@
+﻿@page
+@model Narrowcasting.Pages.Admin.Users.CreateModel
+@{
+    ViewData["Title"] = "Nieuwe gebruiker";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Admin/Users/Index">Gebruikers</a></li>
+                <li class="breadcrumb-item active">Nieuw</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+
+                @if (!ModelState.IsValid)
+                {
+                    <div class="alert alert-danger py-2 small">
+                        <div asp-validation-summary="All"></div>
+                    </div>
+                }
+
+                <form method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="Input.FullName" class="form-label fw-medium small">Volledige naam *</label>
+                        <input asp-for="Input.FullName" class="form-control" />
+                        <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label fw-medium small">E-mailadres *</label>
+                        <input asp-for="Input.Email" class="form-control" placeholder="naam@ziekenhuis.nl" />
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label fw-medium small">Tijdelijk wachtwoord *</label>
+                        <input asp-for="Input.Password" type="password" class="form-control" />
+                        <div class="form-text">Min. 8 tekens, met hoofdletter, cijfer en speciaal teken.</div>
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Role" class="form-label fw-medium small">Rol *</label>
+                        <select asp-for="Input.Role" class="form-select">
+                            <option value="Employee">Employee</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Input.DepartmentId" class="form-label fw-medium small">
+                            Afdeling <span class="text-muted">(verplicht voor Employee, leeg = Admin)</span>
+                        </label>
+                        <select asp-for="Input.DepartmentId" class="form-select" asp-items="@Model.DepartmentSelectList">
+                            <option value="">– Geen (Admin) –</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-1"></i>Aanmaken
+                        </button>
+                        <a asp-page="/Admin/Users/Index" class="btn btn-outline-secondary">Annuleren</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

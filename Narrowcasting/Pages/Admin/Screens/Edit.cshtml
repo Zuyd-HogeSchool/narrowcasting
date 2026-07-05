@@ -1,0 +1,79 @@
+﻿@page
+@model Narrowcasting.Pages.Admin.Screens.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Nieuw scherm" : "Scherm bewerken";
+}
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger small">@err</div>
+}
+@if (TempData["Success"] is string succ)
+{
+    <div class="alert alert-success small">@succ</div>
+}
+
+<div class="d-flex justify-content-between align-items-start mb-1">
+    <div>
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Dashboard/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Admin/Screens/Index">Schermen</a></li>
+                <li class="breadcrumb-item active">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Screen.Id" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Screen.Name" class="form-label fw-medium small">Naam *</label>
+                        <input asp-for="Screen.Name" class="form-control" placeholder="bijv. Wachtkamer Scherm A" />
+                        <span asp-validation-for="Screen.Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Screen.Location" class="form-label fw-medium small">Locatie *</label>
+                        <input asp-for="Screen.Location" class="form-control" placeholder="bijv. Begane grond, gang 2" />
+                        <span asp-validation-for="Screen.Location" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Screen.DepartmentId" class="form-label fw-medium small">Afdeling *</label>
+                        <select asp-for="Screen.DepartmentId" asp-items="Model.DepartmentSelectList" class="form-select">
+                            <option value="0">– Selecteer afdeling –</option>
+                        </select>
+                        <span asp-validation-for="Screen.DepartmentId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3 form-check form-switch">
+                        <input asp-for="Screen.IsActive" class="form-check-input" role="switch" />
+                        <label class="form-check-label small" for="Screen_IsActive">Actief</label>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch">
+                        <input asp-for="Screen.IsStaffScreen" class="form-check-input" role="switch" />
+                        <label class="form-check-label small" for="Screen_IsStaffScreen">Intern scherm (alleen personeelsberichten)</label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-floppy me-1"></i>Opslaan
+                        </button>
+                        <a asp-page="/Admin/Screens/Index" class="btn btn-outline-secondary">Annuleren</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

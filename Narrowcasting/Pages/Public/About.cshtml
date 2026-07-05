@@ -1,0 +1,32 @@
+﻿@page "/About"
+@model Narrowcasting.Pages.Public.AboutModel
+@{
+    ViewData["Title"] = "Over Narrowcasting";
+}
+
+<div class="hero-bar text-center py-4">
+    <div class="container">
+        <h2 class="fw-bold mb-1">Over dit systeem</h2>
+        <p class="text-white-50 mb-0">Narrowcasting Beheersysteem – Ziekenhuis</p>
+    </div>
+</div>
+
+<div class="container py-5" style="max-width: 700px;">
+    <h4 class="fw-bold mb-3">Wat is Narrowcasting?</h4>
+    <p class="text-muted">
+        Dit narrowcasting systeem zorgt ervoor dat digitale schermen verspreid door het ziekenhuis
+        actuele informatie tonen aan patiënten, bezoekers en medewerkers.
+        Denk aan wachttijden, aankondigingen, route-informatie en afdelingsnieuws.
+    </p>
+
+    <h4 class="fw-bold mt-4 mb-3">Afdelingen</h4>
+    <ul class="list-group list-group-flush">
+        @foreach (var dept in Model.Departments)
+        {
+            <li class="list-group-item px-0 d-flex justify-content-between">
+                <span class="fw-medium">@dept.Name</span>
+                <span class="text-muted small">@dept.Description</span>
+            </li>
+        }
+    </ul>
+</div>

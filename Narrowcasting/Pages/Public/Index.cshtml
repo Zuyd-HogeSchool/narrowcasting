@@ -1,0 +1,103 @@
+﻿@page "/"
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero -->
+<div class="p-5 text-center bg-image rounded-3" style="
+    background-image: url('https://images.unsplash.com/photo-1626315869436-d6781ba69d6e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    height: 400px;
+  ">
+    <div class="mask" style="background-color: rgba(0, 0, 0, 0.6);">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="text-white">
+                <h1 class="mb-3">Maandelijks het Ziekenhuis-nieuws in uw mailbox?</h1>
+                <h4 class="mb-3">Meld u dan aan voor de nieuwsbrief!</h4>
+                <a data-mdb-ripple-init class="btn btn-outline-light btn-lg" href="#!" role="button">Inschrijven kan hier</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Hero -->
+<div class="container mt-5">
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-image"></div>
+                <img src="https://images.unsplash.com/photo-1697952431905-9c8d169d9d2b?q=80&w=1528&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Spoedeisende Hulp" />
+                <div class="card-body">
+                    <h5 class="card-title">Spoedeisende Hulp</h5>
+                    <p class="card-text">
+                        Contactgegevens en praktische informatie
+                    </p>
+                    <a href="#" class=" ="btn btn-primary btn-lg mt-3">
+                        Naar Spoedeisende Hulp
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1453&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Onze bezoektijden" />
+                <div class="card-body">
+                    <h5 class="card-title">Onze bezoektijden</h5>
+                    <p class="card-text">
+                        Bekijk de actuele bezoektijden per afdeling
+                    </p>
+                    <a href="#" class=" ="btn btn-primary btn-lg mt-3">
+                        Bekijk bezoektijden
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1666214277657-e60f05c40b04?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="MijnZiekenhuis+" />
+                <div class="card-body">
+                    <h5 class="card-title">Regel het zelf in MijnZiekenhuis+</h5>
+                    <p class="card-text">Bekijk afspraken, uitslagen en persoonlijke gegevens online</p>
+                    <a href="#" class=" ="btn btn-primary btn-lg mt-3">
+                        Naar MijnZiekenhuis+
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* <div class="hero-bar text-center">
+    <div class="container">
+        <h1 class="fw-bold display-5 mb-2">Welkom bij het Ziekenhuis</h1>
+        <p class="lead mb-4">Hier vindt u actuele informatie over afdelingen, wachttijden en aankondigingen.</p>
+        <a href="/Cast" class="btn btn-light btn-lg px-4">
+            <i class="bi bi-display me-2"></i>Bekijk schermen
+        </a>
+    </div>
+</div>
+
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Actuele aankondigingen</h2>
+    <div class="row g-3">
+        @foreach (var a in Model.Announcements)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <span class="badge bg-primary mb-2">@a.Department?.Name</span>
+                        <h6 class="fw-bold">@a.Title</h6>
+                        <p class="text-muted small mb-0">@a.Content</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 small text-muted">
+                        @a.PublishedAt.ToLocalTime().ToString("dd MMMM yyyy")
+                    </div>
+                </div>
+            </div>
+        }
+        @if (!Model.Announcements.Any())
+        {
+            <div class="col-12 text-muted">Geen actuele aankondigingen.</div>
+        }
+    </div>
+</div> *@
