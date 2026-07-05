@@ -72,8 +72,8 @@ public class ForgotPasswordModel : PageModel
 
             await _emailSender.SendEmailAsync(
                 Input.Email,
-                "Reset Password",
-                $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                "Wachtwoord opnieuw instellen",
+                $"Stel uw wachtwoord opnieuw in via <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>hier klikken</a>.");
 
             return RedirectToPage("./ForgotPasswordConfirmation");
         }
