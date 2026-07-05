@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -60,7 +60,7 @@ public class LoginWith2faModel : PageModel
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [Required]
-        [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(7, ErrorMessage = "De {0} moet minimaal {2} en maximaal {1} ​​tekens lang zijn.", MinimumLength = 6)]
         [DataType(DataType.Text)]
         [Display(Name = "Authenticator code")]
         public string TwoFactorCode { get; set; } = default!;
@@ -69,7 +69,7 @@ public class LoginWith2faModel : PageModel
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Display(Name = "Remember this machine")]
+        [Display(Name = "Onthoud deze machine.")]
         public bool RememberMachine { get; set; }
     }
 
@@ -80,7 +80,7 @@ public class LoginWith2faModel : PageModel
 
         if (user == null)
         {
-            throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+            throw new InvalidOperationException($"Het lukt niet om de gebruiker voor tweefactorauthenticatie te laden.");
         }
 
         ReturnUrl = returnUrl;
@@ -101,7 +101,7 @@ public class LoginWith2faModel : PageModel
         var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
         if (user == null)
         {
-            throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+            throw new InvalidOperationException($"Het lukt niet om de gebruiker voor tweefactorauthenticatie te laden.");
         }
 
         var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
@@ -112,18 +112,18 @@ public class LoginWith2faModel : PageModel
 
         if (result.Succeeded)
         {
-            _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+            _logger.LogInformation("Gebruiker met ID '{UserId}' ingelogd met 2fa.", user.Id);
             return LocalRedirect(returnUrl);
         }
         else if (result.IsLockedOut)
         {
-            _logger.LogWarning("User with ID '{UserId}' account locked out.", user.Id);
+            _logger.LogWarning("Gebruikersaccount met ID '{UserId}' geblokkeerd.", user.Id);
             return RedirectToPage("./Lockout");
         }
         else
         {
-            _logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
-            ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+            _logger.LogWarning("Ongeldige authenticatorcode ingevoerd voor gebruiker met ID '{UserId}'.", user.Id);
+            ModelState.AddModelError(string.Empty, "Ongeldige authenticatorcode ingevoerd.");
             return Page();
         }
     }

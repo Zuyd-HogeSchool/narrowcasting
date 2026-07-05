@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -49,7 +49,7 @@ public class ResetPasswordModel : PageModel
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "De {0} moet minimaal {2} en maximaal {1} ​​tekens lang zijn.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         public string Password { get; set; } = default!;
 
@@ -59,7 +59,7 @@ public class ResetPasswordModel : PageModel
         /// </summary>
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = "Het wachtwoord en het bevestigingswachtwoord komen niet overeen.")]
         public string? ConfirmPassword { get; set; }
 
         /// <summary>
@@ -75,7 +75,7 @@ public class ResetPasswordModel : PageModel
     {
         if (code == null)
         {
-            return BadRequest("A code must be supplied for password reset.");
+            return BadRequest("Voor het opnieuw instellen van uw wachtwoord moet een code worden opgegeven.");
         }
         else
         {
